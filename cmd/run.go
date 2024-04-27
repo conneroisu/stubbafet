@@ -13,14 +13,12 @@ import (
 
 // run is the main function that generates the stubs for the project
 func run(ctx context.Context) error {
-	// Create a new error group
 	eg, _ := errgroup.WithContext(ctx)
-	// Generate stubs for the project
 	eg.Go(func() error {
 		return exec.Command("stubgen", "-p", "src", "-o", "stubs").Run()
 	})
 	if _, err := os.Stat("stubs"); os.IsNotExist(err) {
-		return os.MkdirAll("stubs", 0755)
+		os.Mkdir("stubs", 0755)
 	}
 	fmt.Println("Generating stubs for project...")
 	which, err := exec.Command("which", "pip").Output()
@@ -28,7 +26,6 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("error getting pip path: %v", err)
 	}
 	fmt.Printf("which pip: %s\n", strings.TrimSpace(string(which)))
-	// Get a list of installed packages using pip freeze
 	out, err := exec.Command("pip", "freeze").Output()
 	if err != nil {
 		return fmt.Errorf("error getting list of installed packages: %v", err)
@@ -40,7 +37,7 @@ func run(ctx context.Context) error {
 			pkgName := strings.Split(pkgCopy, "==")[0]
 			err := exec.Command("stubgen", "-o", "stubs/", "-m", pkgName).Run()
 			if err != nil {
-				log.Printf("Error generating stubs for %s: %v", pkgName, err)
+				log.Printf("error generating stubs for %s: %v", pkgName, err)
 			} else {
 				fmt.Printf("Generating stubs for %s...\n", pkgName)
 			}
