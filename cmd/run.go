@@ -41,7 +41,12 @@ func run(ctx context.Context) error {
 			} else {
 				fmt.Printf("Generating stubs for %s...\n", pkgName)
 			}
-			return err
+			err = exec.Command("mypy", "-o", "stubs/", "-m", pkgName).Run()
+			if err != nil {
+				return fmt.Errorf("error generating mypy stubs for %s: %v", pkgName, err)
+			}
+			fmt.Printf("Generating mypy stubs for %s...\n", pkgName)
+			return nil
 		})
 	}
 	return eg.Wait()
