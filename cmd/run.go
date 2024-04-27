@@ -11,44 +11,33 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// run is the main function that generates the stubs for the project
 func run(ctx context.Context) error {
 	// Create a new error group
 	eg, _ := errgroup.WithContext(ctx)
-
 	// Generate stubs for the project
 	eg.Go(func() error {
 		return exec.Command("stubgen", "-p", "src", "-o", "stubs").Run()
 	})
-
-	// Create a directory for stubs if it doesn't already exist
-	eg.Go(func() error {
-		if _, err := os.Stat("stubs"); os.IsNotExist(err) {
-			return os.MkdirAll("stubs", 0755)
-		}
-		return nil
-	})
-
-	// Echo messages
-	eg.Go(func() error {
-		fmt.Println("Generating stubs for project...")
-		out, err := exec.Command("which", "pip").Output()
-		if err != nil {
-			return err
-		}
-		fmt.Printf("which pip: %s\n", strings.TrimSpace(string(out)))
-		return nil
-	})
-
+	if _, err := os.Stat("stubs"); os.IsNotExist(err) {
+		return os.MkdirAll("stubs", 0755)
+	}
+	fmt.Println("Generating stubs for project...")
+	which, err := exec.Command("which", "pip").Output()
+	if err != nil {
+		return fmt.Errorf("error getting pip path: %v", err)
+	}
+	fmt.Printf("which pip: %s\n", strings.TrimSpace(string(which)))
 	// Get a list of installed packages using pip freeze
 	out, err := exec.Command("pip", "freeze").Output()
 	if err != nil {
-		return err
+		return fmt.Errorf("error getting list of installed packages: %v", err)
 	}
 	packages := strings.Split(strings.TrimSpace(string(out)), "\n")
 	for _, pkg := range packages {
-		// Generate stubs for each package
+		pkgCopy := pkg
 		eg.Go(func() error {
-			pkgName := strings.Split(pkg, "==")[0]
+			pkgName := strings.Split(pkgCopy, "==")[0]
 			err := exec.Command("stubgen", "-o", "stubs/", "-m", pkgName).Run()
 			if err != nil {
 				log.Printf("Error generating stubs for %s: %v", pkgName, err)
@@ -58,6 +47,5 @@ func run(ctx context.Context) error {
 			return err
 		})
 	}
-	fmt.Println("Stub generation complete.")
 	return eg.Wait()
 }
