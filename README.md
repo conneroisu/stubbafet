@@ -1,2 +1,8 @@
 # stubba
-generate stubs from requirements files
+
+Generate stubs from requirements files
+
+Install: 
+```bash 
+go install github.com/conneroisu/stubba@latest
+```
