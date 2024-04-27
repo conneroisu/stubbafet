@@ -1,4 +1,4 @@
-module github.com/conneroisu/stubba
+module github.com/conneroisu/stubbafet
 
 go 1.22.0
 
