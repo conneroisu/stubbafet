@@ -14,6 +14,7 @@ import (
 // run is the main function that generates the stubs for the project
 func run(ctx context.Context) error {
 	eg, _ := errgroup.WithContext(ctx)
+	eg.SetLimit(10)
 	eg.Go(func() error {
 		return exec.Command("stubgen", "-p", "src", "-o", "stubs").Run()
 	})
