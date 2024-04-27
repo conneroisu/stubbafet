@@ -5,7 +5,7 @@ Set FontSize 16
 Set Width 1200
 Set Height 600
 
-Type "docuvet-tools edit"
+Type "stubbafet"
 Sleep 500ms
 
 Enter

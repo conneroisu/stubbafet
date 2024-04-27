@@ -1,8 +1,6 @@
 name: Tapes
 run-name: Generate Gif Tapes
 on: [push]
-branch: 
-  [main]
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
@@ -13,11 +11,16 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.0' # The Go version to download (if necessary) and use.
+      - run: echo "🚀 go version $(go version) is installed."
       - run: |
           mkdir -p /etc/apt/keyrings
           curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg
           echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" |  tee /etc/apt/sources.list.d/charm.list
           # Install ttyd from https://github.com/tsl0922/ttyd/releases
           apt update && apt install vhs ffmpeg
+          go install github.com/conneroisu/stubbafet@latest
       - run: vhs ./tapes/pytorch.tape
       - run: echo "🍏 This job's status is ${{ job.status }}."
