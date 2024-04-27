@@ -36,6 +36,10 @@ func run(ctx context.Context) error {
 		pkgCopy := pkg
 		eg.Go(func() error {
 			pkgName := strings.Split(pkgCopy, "==")[0]
+			err = exec.Command("basedpyright", "--createstub", pkgName).Run()
+			if err != nil {
+				return fmt.Errorf("error generating basedpyright stubs for %s: %v", pkgName, err)
+			}
 			err := exec.Command("stubgen", "-o", "stubs/", "-m", pkgName).Run()
 			if err != nil {
 				log.Printf("error generating stubs for %s: %v", pkgName, err)
@@ -45,11 +49,6 @@ func run(ctx context.Context) error {
 			err = exec.Command("mypy", "-o", "stubs/", "-m", pkgName).Run()
 			if err != nil {
 				return fmt.Errorf("error generating mypy stubs for %s: %v", pkgName, err)
-			}
-
-			err = exec.Command("basedpyright", "--createstub", pkgName).Run()
-			if err != nil {
-				return fmt.Errorf("error generating basedpyright stubs for %s: %v", pkgName, err)
 			}
 			fmt.Printf("Generating mypy stubs for %s...\n", pkgName)
 			return nil
